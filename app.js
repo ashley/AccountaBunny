@@ -14,45 +14,27 @@ var connector = new builder.ChatConnector({
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 server.post('/api/messages', connector.listen());
+var bot = new builder.UniversalBot(connector);
 
-var userStore = [];
-var bot = new builder.UniversalBot(connector, function (session) {
-	var address = session.message.address;
-    userStore.push(address);
-    session.endDialog('resurrecting AccountaBunny from the dead...');
-});
+// Dialogs
+var Action = require('./action');
 
-// Every 5 seconds, check for new registered users and start a new dialog
-setInterval(function () {
-    var newAddresses = userStore.splice(0);
-    newAddresses.forEach(function (address) {
+// Setup dialogs
+bot.dialog('action', Action.Dialog);
 
-        console.log('Starting AccountaBunny:', address);
-
-        // new conversation address, copy without conversationId
-        var newConversationAddress = Object.assign({}, address);
-        delete newConversationAddress.conversation;
-
-        // start survey dialog
-        bot.beginDialog(newConversationAddress, 'survey', null, (err) => {
-            if (err) {
-                // error ocurred while starting new conversation. Channel not supported?
-                bot.send(new builder.Message()
-                    .text('This channel does not support this operation: ' + err.message)
-                    .address(address));
-            }
-        });
-
-    });
-}, 5000);
-
+// Root dialog
 function getCalls(){
 	return ['Call1', 'Call2', 'Call3'];
 }
 
-bot.dialog('survey', [
+function getIntents(){
+	return ['I have time today','I can make a phone call RIGHT NOW'];
+}
+
+bot.dialog('/', new builder.IntentDialog()
+    .onDefault([
     function (session) {
-    	builder.Prompts.text(session, 'Hey, I\’m AccountaBunny' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!')
+    	session.send('Hey, I\’m AccountaBunny' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
         //wait
         builder.Prompts.text(session, 'First things first, what\'s your name?');
     },
@@ -66,7 +48,61 @@ bot.dialog('survey', [
     },
     function (session, results) {
         session.userData.call = results.response.entity;
-        session.endDialog('Got it... ' + session.userData.name +
+        session.send('Got it... ' + session.userData.name +
             ' you\'re interested in ' + session.userData.call + '.');
-    }
-]);
+        //wait
+        session.send('We do have some ground rules before we get started.');
+        session.send('First, we need accurate numbers to track the results of our efforts, so don’t lie. **Honor system**');
+        builder.Prompts.text(session, 'And that’s it, that’s literally the only rule! Ready to get started?');        
+    },
+    function (session, results) {
+        if (results.response == 'no') {
+            session.send('okay I see how this is');
+            return session.endDialog();
+        }
+
+        else if(results.response == 'yes'){
+        	session.send('Great! Here’s how this works: ');
+        	session.send('If you have some free time and want to help make this country a better place (or a less shitty place for those “glass half empty” folks), let me know by saying “I have * minutes of free time today”');
+        	session.send('If you know of an event, rally, or other way to get involved in your area, let me know by saying “I have a call to action” ');
+        	builder.Prompts.text(session, 'Make sense?');
+        }
+    },
+    function (session, results){
+    	console.log("ENTER");
+    	if(results.response == 'no'){
+    		session.send('Well the best way to learn is to actually do the thing! Let’s try it.');
+    	}
+        else if(results.response == 'yes'){
+        	session.send('Sweet, now let’s do the thing!');
+    	}
+    	console.log("CALL: " + Action.label);
+    	builder.Prompts.choice(session,'Free Time today?',['I have an Action']);
+    },
+        function (session, results) {
+            if (!results.response) {
+                // exhausted attemps and no selection, start over
+                session.send('Ooops! Too many attemps :( But don\'t worry, I\'m handling that exception and you can try again!');
+                return session.endDialog();
+            }
+
+            // on error, start over
+            session.on('error', function (err) {
+                session.send('Failed with message: %s', err.message);
+                session.endDialog();
+            });
+
+            // continue on proper dialog
+            var selection = results.response.entity;
+            switch (selection) {
+                case 'I have an Action':
+                    return session.beginDialog('action');
+
+            }
+        }
+]));
+
+
+
+
+
