@@ -31,25 +31,37 @@ function getIntents(){
 	return ['I have time today','I can make a phone call RIGHT NOW'];
 }
 
+// http://i.imgur.com/dxaVAwf.png # excited bunny
+// http://i.imgur.com/pH5B1R9.png # rip bunny 
+// http://i.imgur.com/xpFl3in.png # k. bunny
+// http://i.imgur.com/ITdZCrS.png # mad bunny
+// http://i.imgur.com/wx2OQ1s.png # regular bunny
+
 bot.dialog('/', new builder.IntentDialog()
     .onDefault([
     function (session) {
-    	session.send('Hey, I\’m AccountaBunny' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
+    	session.send('Hey, I\’m AccountaBunny ' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
+        var msg = new builder.Message(session)
+            .attachments([{
+                contentType: "image/png",
+                contentUrl: "http://i.imgur.com/wx2OQ1s.png"
+            }]);
+        session.send(msg);
         //wait
         builder.Prompts.text(session, 'First things first, what\'s your name?');
     },
     function (session, results) {
         session.userData.name = results.response;
-        builder.Prompts.number(session, 'Hi ' + results.response + ', Next, we need to establish your base of operations. What\’s your zipcode?');
+        builder.Prompts.number(session, 'Cool, thanks ' + results.response + '. Next, we need to establish your base of operations. What\’s your zipcode?');
     },
     function (session, results) {
         session.userData.zipcode = results.response;
-        builder.Prompts.choice(session, 'And a rebel without a cause is a pretty lame rebel. Here’s some shit that\’s going down right now, enter the numbers of the ones that are important to you: ', getCalls());
+        builder.Prompts.choice(session, 'And a rebel without a cause is a pretty lame rebel. Here’s some shit that\’s going down right now. Enter the number of the issue you are most interested in today: ', getCalls());
     },
     function (session, results) {
         session.userData.call = results.response.entity;
-        session.send('Got it... ' + session.userData.name +
-            ' you\'re interested in ' + session.userData.call + '.');
+        session.send('Got it ' + session.userData.name +
+            ', you\'re interested in ' + session.userData.call + '.');
         //wait
         session.send('We do have some ground rules before we get started.');
         session.send('First, we need accurate numbers to track the results of our efforts, so don’t lie. **Honor system**');
@@ -57,13 +69,19 @@ bot.dialog('/', new builder.IntentDialog()
     },
     function (session, results) {
         if (results.response == 'no') {
-            session.send('okay I see how this is');
+            session.send('okay I see how it is');
+            var msg = new builder.Message(session)
+                .attachments([{
+                    contentType: "image/png",
+                    contentUrl: "http://i.imgur.com/xpFl3in.png"
+                }]);
+            session.send(msg);
             return session.endDialog();
         }
 
         else if(results.response == 'yes'){
         	session.send('Great! Here’s how this works: ');
-        	session.send('If you have some free time and want to help make this country a better place (or a less shitty place for those “glass half empty” folks), let me know by saying “I have * minutes of free time today”');
+        	session.send('If you have some free time and want to help make this country a better place (or a less shitty place for those “glass half empty” folks), let me know by saying “I have [number] minutes of free time today”');
         	session.send('If you know of an event, rally, or other way to get involved in your area, let me know by saying “I have a call to action” ');
         	builder.Prompts.text(session, 'Make sense?');
         }
