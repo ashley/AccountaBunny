@@ -1,6 +1,6 @@
 var builder = require('botbuilder');
 var restify = require('restify');
-var emoji = require('node-emoji')
+var emoji = require('node-emoji');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -14,6 +14,21 @@ var connector = new builder.ChatConnector({
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 server.post('/api/messages', connector.listen());
+
+var Connection = require('tedious').Connection;  
+var config = {  
+    userName: 'accountabuddysvr.database.windows.net',  
+    password: 'w0mb@tab',  
+    server: 'accountabuddysvr.database.windows.net',  
+    // If you are on Microsoft Azure, you need this:  
+    options: {encrypt: true, database: 'AdventureWorks'}  
+};  
+var connection = new Connection(config);  
+connection.on('connect', function(err) {  
+// If no error, then good to proceed.  
+    console.log("Connected");  
+});
+
 var bot = new builder.UniversalBot(connector);
 
 // Dialogs
@@ -51,6 +66,7 @@ bot.dialog('/', new builder.IntentDialog()
                 contentUrl: "http://i.imgur.com/wx2OQ1s.png"
             }]);
         session.send(msg);
+        session.send("You said: %s", session.message.text);
         //wait
         builder.Prompts.text(session, 'First things first, what\'s your name?');
     },
@@ -69,10 +85,10 @@ bot.dialog('/', new builder.IntentDialog()
         //wait
         session.send('We do have some ground rules before we get started.');
         session.send('First, we need accurate numbers to track the results of our efforts, so don’t lie. **Honor system**');
-        builder.Prompts.text(session, 'And that’s it, that’s literally the only rule! Ready to get started?');        
+        builder.Prompts.confirm(session, 'And that’s it, that’s literally the only rule! Ready to get started?');        
     },
     function (session, results) {
-        if (results.response == 'no') {
+        if (!results.response) {
             session.send('okay I see how it is');
             var msg = new builder.Message(session)
                 .attachments([{
@@ -83,19 +99,19 @@ bot.dialog('/', new builder.IntentDialog()
             return session.endDialog();
         }
 
-        else if(results.response == 'yes'){
+        else if(results.response){
         	session.send('Great! Here’s how this works: ');
         	session.send('If you have some free time and want to help make this country a better place (or a less shitty place for those “glass half empty” folks), let me know by saying “I have [number] minutes of free time today”');
         	session.send('If you know of an event, rally, or other way to get involved in your area, let me know by saying “I have a call to action” ');
-        	builder.Prompts.text(session, 'Make sense?');
+        	builder.Prompts.confirm(session, 'Make sense?');
         }
     },
     function (session, results){
     	console.log("ENTER");
-    	if(results.response == 'no'){
+    	if(!results.response){
     		session.send('Well the best way to learn is to actually do the thing! Let’s try it.');
     	}
-        else if(results.response == 'yes'){
+        else if(results.response){
         	session.send('Sweet, now let’s do the thing!');
     	}
     	console.log("CALL: " + Action.label);
