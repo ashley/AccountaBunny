@@ -52,11 +52,16 @@ bot.dialog('/', new builder.IntentDialog()
     },
     function (session, results) {
         session.userData.name = results.response;
-        builder.Prompts.number(session, 'Cool, thanks ' + results.response + '. Next, we need to establish your base of operations. What\’s your zipcode?');
+        builder.Prompts.text(session, 'Cool, thanks ' + results.response + '. Next, we need to establish your base of operations. What\’s your zipcode?');
     },
     function (session, results) {
+        string_zipcode = results.response;
+        if (string_zipcode.length != 5) {
+            session.send('Sorry, that wasn\'t a valid 5-digit zipcode. Let\'s try that again.');
+            session.endDialog();
+        }
         session.userData.zipcode = results.response;
-        builder.Prompts.choice(session, 'And a rebel without a cause is a pretty lame rebel. Here’s some shit that\’s going down right now. Enter the number of the issue you are most interested in today: ', getCalls());
+        builder.Prompts.choice(session, ' And a rebel without a cause is a pretty lame rebel. Here’s some shit that\’s going down right now. Enter the number of the issue you are most interested in today: ', getCalls());
     },
     function (session, results) {
         session.userData.call = results.response.entity;
