@@ -101,12 +101,8 @@ if(newUser){
     bot.dialog('/', new builder.IntentDialog()
         .onDefault([
         function (session) {
-<<<<<<< HEAD
             console.log(phone.toString() == phones[0]);
         	session.send('Hey, I\’m AccountaBunny ' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
-=======
-            session.send('Hey, I\’m AccountaBunny ' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
->>>>>>> 1a157141663d0e1348e60a477147d5eeacd4a9e2
             var msg = new builder.Message(session)
                 .attachments([{
                     contentType: "image/png",
