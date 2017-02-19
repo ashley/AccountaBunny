@@ -9,7 +9,7 @@ module.exports = {
         },
         function(session, results){
             session.userData.title = results.response.entity;
-            builder.Prompts.text(session, 'What time is your actionable at? (exp. 2 PM, any time)');
+            builder.Prompts.text(session, 'At what time is your actionable? (exp. HH:MM AM/PM, any time)');
         },
         function(session, results){
             session.userData.time = results.response.entity;
@@ -17,7 +17,7 @@ module.exports = {
         },
         function(session, results){
             session.userData.location = results.response.entity;
-            builder.Prompts.text(session, 'How much time will your actionable take?');
+            builder.Prompts.text(session, 'How long will your actionable take?');
         },   
         function(session, results){
             session.userData.duration = results.response.entity;
