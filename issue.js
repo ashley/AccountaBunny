@@ -7,8 +7,6 @@ function getChoices(){
 module.exports = {
     Label: 'Work on an issue',
     Dialog: [
-        // Destination 
-
         function (session){
             builder.Prompts.choice(session,'Let’s work on ISSUE today',getChoices());
         },
