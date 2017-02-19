@@ -2,6 +2,8 @@ var builder = require('botbuilder');
 var restify = require('restify');
 var emoji = require('node-emoji');
 var sleep = require('sleep');
+var Request = require('tedious').Request;  
+var TYPES = require('tedious').TYPES;  
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -27,7 +29,7 @@ var config = {
 var connection = new Connection(config);  
 connection.on('connect', function(err) {
     if (err) return console.error(err); // <- 
-    executeStatement();
+    executeStatement('phone', 'Users', 'userID');
 });
 
 var bot = new builder.UniversalBot(connector);
@@ -42,11 +44,10 @@ bot.dialog('action', Action.Dialog);
 bot.dialog('involve', Involve.Dialog);
 bot.dialog('issue', Issue.Dialog);
 
-var Request = require('tedious').Request;  
-var TYPES = require('tedious').TYPES;  
+var phone = "";
 
-function executeStatement() {  
-    request = new Request("SELECT TOP 1 issueID FROM UserIssue WHERE userID=001 ORDER BY RAND();", function(err) {  
+function executeStatement(item, table, from) {  
+    request = new Request("SELECT TOP 1 "+item+" FROM " + table + " WHERE "+from+"=001 ORDER BY RAND();", function(err) {  
     if (err) {  
         console.log(err);}  
     });  
@@ -59,12 +60,13 @@ function executeStatement() {
             result+= column.value + " ";  
           }  
         });  
-        console.log(result);  
+        console.log(result); 
+        phone = result;
         result ="";  
     });  
 
     request.on('done', function(rowCount, more) {  
-    console.log(rowCount + ' rows returned');  
+    //console.log(rowCount + ' rows returned');  
     });  
     connection.execSql(request);  
 }
@@ -79,6 +81,8 @@ function getIntents(){
 	return ['I have time today','I want to do something','Work on an issue'];
 }
 
+var phones = [5555555555, 00000000000];
+
 // http://i.imgur.com/dxaVAwf.png # excited bunny
 // http://i.imgur.com/pH5B1R9.png # rip bunny 
 // http://i.imgur.com/xpFl3in.png # k. bunny
@@ -91,6 +95,7 @@ if(newUser){
     bot.dialog('/', new builder.IntentDialog()
         .onDefault([
         function (session) {
+            console.log(phone.toString() == phones[0]);
         	session.send('Hey, I\’m AccountaBunny ' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
             var msg = new builder.Message(session)
                 .attachments([{
@@ -101,12 +106,12 @@ if(newUser){
             //wait
             builder.Prompts.text(session, 'First things first, what\'s your name?');
         },
-        function (session, results) {
+        /*function (session, results) {
             session.userData.name = results.response;
             builder.Prompts.number(session, 'Cool, thanks ' + results.response + '. Next, we need to establish your base of operations. What\’s your zipcode?');
-        },
+        },*/
         function (session, results) {
-            session.userData.zipcode = results.response;
+            //session.userData.zipcode = results.response;
             builder.Prompts.choice(session, 'And a rebel without a cause is a pretty lame rebel. Here’s some shit that\’s going down right now. Enter the number of the issue you are most interested in today: ', getCalls());
         },
         function (session, results) {
