@@ -1,12 +1,16 @@
 var builder = require('botbuilder');
 
+function getChoices(){
+    return ['Do', 'Call', 'Email'];
+}
+
 module.exports = {
     Label: 'Work on an issue',
     Dialog: [
         // Destination 
 
         function (session){
-            builder.Prompts.choice(session,'Let’s work on ISSUE today',["Do, Call, Email"]);
+            builder.Prompts.choice(session,'Let’s work on ISSUE today',getChoices());
         },
         function (session, results) {
             if (!results.response) {
@@ -25,12 +29,15 @@ module.exports = {
             var selection = results.response.entity;
             switch (selection) {
                 case 'Do':
-                    session.sender('One of your friendly neighborhood accountabuddies suggested that you CALL_TO_ACTION at TIME_OF_ACTION at PLACE_OF_ACTION');
+                    session.send('One of your friendly neighborhood accountabuddies suggested that you CALL_TO_ACTION at TIME_OF_ACTION at PLACE_OF_ACTION');
+                    return session.endDialog();
                     //builder.Prompts.text(session, 'Would you like to add this to your calendar?');
                 case 'Call':
-                    session.sender('Calling your TYPE_OF_REP  NAME_OF_REP would be a great way to let them know how you feel about this issue. You can reach their office at PHONE_NUMBER before 6 PM today.');                
+                    session.send('Calling your TYPE_OF_REP  NAME_OF_REP would be a great way to let them know how you feel about this issue. You can reach their office at PHONE_NUMBER before 6 PM today.');                
+                    return session.endDialog();
                 case 'Email':
-                    session.sender('Emailing your  TYPE_OF_REP  NAME_OF_REP would be a great way to let them know how you feel about this issue.  You can reach their office at EMAIL before 6 PM today.');
+                    session.send('Emailing your  TYPE_OF_REP  NAME_OF_REP would be a great way to let them know how you feel about this issue.  You can reach their office at EMAIL before 6 PM today.');
+                    return session.endDialog();
             }
         }                   
     ]
