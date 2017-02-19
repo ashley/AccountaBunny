@@ -18,9 +18,13 @@ var bot = new builder.UniversalBot(connector);
 
 // Dialogs
 var Action = require('./action');
+var Involve = require('./involve');
+var Issue = require('./issue');
 
 // Setup dialogs
 bot.dialog('action', Action.Dialog);
+bot.dialog('involve', Involve.Dialog);
+bot.dialog('issue', Issue.Dialog);
 
 // Root dialog
 function getCalls(){
@@ -28,7 +32,7 @@ function getCalls(){
 }
 
 function getIntents(){
-	return ['I have time today','I can make a phone call RIGHT NOW'];
+	return ['I have time today','I want to do something','Work on an issue'];
 }
 
 // http://i.imgur.com/dxaVAwf.png # excited bunny
@@ -95,7 +99,7 @@ bot.dialog('/', new builder.IntentDialog()
         	session.send('Sweet, now let’s do the thing!');
     	}
     	console.log("CALL: " + Action.label);
-    	builder.Prompts.choice(session,'Free Time today?',['I have an Action']);
+    	builder.Prompts.choice(session,'Free Time today?',getIntents());
     },
         function (session, results) {
             if (!results.response) {
@@ -115,6 +119,10 @@ bot.dialog('/', new builder.IntentDialog()
             switch (selection) {
                 case 'I have an Action':
                     return session.beginDialog('action');
+                case  'I want to do something':
+                    return session.beginDialog('involve');
+                case 'Work on an issue':
+                	return session.beginDialog('issue');
 
             }
         }
