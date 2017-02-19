@@ -16,6 +16,12 @@ var connector = new builder.ChatConnector({
 });
 server.post('/api/messages', connector.listen());
 
+// Serve a static web page
+server.get(/.*/, restify.serveStatic({
+    'directory': '.',
+    'default': 'index.html'
+}));
+
 var Connection = require('tedious').Connection;  
 var config = {  
     userName: 'abadmin@accountabuddysvr',  
