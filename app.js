@@ -34,9 +34,9 @@ var config = {
 };  
 var connection = new Connection(config);  
 connection.on('connect', function(err) {
-    if (err) return console.error(err); // <- 
-    executeStatement('phone', 'Users', 'userID');
-    userNew();
+    if (err) return console.error("err: " + err);
+    //executeStatement('phone', 'Users', 'userID');
+    console.log("usernew() " + userNew());
 });
 
 var bot = new builder.UniversalBot(connector);
@@ -52,12 +52,12 @@ bot.dialog('involve', Involve.Dialog);
 bot.dialog('issue', Issue.Dialog);
 
 var phone = "";
-var phones = ['5555555555', '00000000000'];
+var phones = ['5555555555','00000000000'];
 
 function executeStatement(item, table, from) {  
     request = new Request("SELECT TOP 1 "+item+" FROM " + table + " WHERE "+from+"=001 ORDER BY RAND();", function(err) {  
     if (err) {  
-        console.log(err);}  
+        console.log("err: " + err);}  
     });  
     var result = "";  
     request.on('row', function(columns) {  
@@ -68,7 +68,7 @@ function executeStatement(item, table, from) {
             result+= column.value + " ";  
           }  
         });  
-        //console.log(result); 
+        console.log("RESULTS: " + result); 
         phone = result;
         result ="";  
         console.log("ph1: " + phone);
@@ -96,24 +96,32 @@ function getIntents(){
 // http://i.imgur.com/ITdZCrS.png # mad bunny
 // http://i.imgur.com/wx2OQ1s.png # regular bunny
 
-var newUser = true;
+var newUser = false;
 
 function userNew(){
-    if(phone.localeCompare(phones[0])==1){
-        newUser = false;
-        console.log("ph3: " + phone);
-        console.log(phones[0]);
-        console.log(phone.localeCompare(phones[0]));
-        return false
-    }
+    for(var num = 0; num<phones.length;num++){
+        console.log("phone: " + phone);
+        if(phone.localeCompare(phones[num])==1){
+            newUser = false;
+            console.log("ph3: " + phone);
+            console.log("phones[0]: " + phones[0]);
+            console.log("compare ph: " + phone.localeCompare(phones[0]));
+            return false
+        }
+        //else if (phone == ""){
+            //return true;
+        //}
+    } 
+    return true;  
 }
 
-if(userNew()){
+//should use useNew but couldn't figure out how to sync executeStatement()
+if(newUser){
     console.log("NEW USER");
     bot.dialog('/', new builder.IntentDialog()
         .onDefault([
         function (session) {
-            console.log(phone.localeCompare(phones[0]));
+            console.log("cpmpare:" + phone.localeCompare(phones[0]));
             console.log("ph4: " + phone);
         	session.send('Hey, I\’m AccountaBunny ' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
             var msg = new builder.Message(session)
@@ -201,7 +209,7 @@ if(userNew()){
             }
     ]));
 }
-else if(!userNew()){
+else if(!newUser){
     console.log("OLD USER");    
     bot.dialog('/', new builder.IntentDialog()
         .onDefault([
