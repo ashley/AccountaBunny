@@ -18,6 +18,12 @@ var connector = new builder.ChatConnector({
 });
 server.post('/api/messages', connector.listen());
 
+// Serve a static web page
+server.get(/.*/, restify.serveStatic({
+    'directory': '.',
+    'default': 'index.html'
+}));
+
 var Connection = require('tedious').Connection;  
 var config = {  
     userName: 'abadmin@accountabuddysvr',  
@@ -74,11 +80,11 @@ function executeStatement(item, table, from) {
 
 // Root dialog
 function getCalls(){
-	return ['Call1', 'Call2', 'Call3'];
+    return ['Call1', 'Call2', 'Call3'];
 }
 
 function getIntents(){
-	return ['I have time today','I want to do something','Work on an issue'];
+    return ['I have time today','I want to do something','Work on an issue'];
 }
 
 var phones = [5555555555, 00000000000];
@@ -95,8 +101,12 @@ if(newUser){
     bot.dialog('/', new builder.IntentDialog()
         .onDefault([
         function (session) {
+<<<<<<< HEAD
             console.log(phone.toString() == phones[0]);
         	session.send('Hey, I\’m AccountaBunny ' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
+=======
+            session.send('Hey, I\’m AccountaBunny ' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
+>>>>>>> 1a157141663d0e1348e60a477147d5eeacd4a9e2
             var msg = new builder.Message(session)
                 .attachments([{
                     contentType: "image/png",
@@ -136,22 +146,22 @@ if(newUser){
             }
 
             else if(results.response){
-            	session.send('Great! Here’s how this works: ');
-            	session.send('If you have some free time and want to help make this country a better place (or a less shitty place for those “glass half empty” folks), let me know by saying “I have [number] minutes of free time today”');
-            	session.send('If you know of an event, rally, or other way to get involved in your area, let me know by saying “I have a call to action” ');
-            	builder.Prompts.confirm(session, 'Make sense?');
+                session.send('Great! Here’s how this works: ');
+                session.send('If you have some free time and want to help make this country a better place (or a less shitty place for those “glass half empty” folks), let me know by saying “I have [number] minutes of free time today”');
+                session.send('If you know of an event, rally, or other way to get involved in your area, let me know by saying “I have a call to action” ');
+                builder.Prompts.confirm(session, 'Make sense?');
             }
         },
         function (session, results){
-        	console.log("ENTER");
-        	if(!results.response){
-        		session.send('Well the best way to learn is to actually do the thing! Let’s try it.');
-        	}
+            console.log("ENTER");
+            if(!results.response){
+                session.send('Well the best way to learn is to actually do the thing! Let’s try it.');
+            }
             else if(results.response){
-            	session.send('Sweet, now let’s do the thing!');
-        	}
-        	console.log("CALL: " + Action.label);
-        	builder.Prompts.choice(session,'Free Time today?',getIntents());
+                session.send('Sweet, now let’s do the thing!');
+            }
+            console.log("CALL: " + Action.label);
+            builder.Prompts.choice(session,'Free Time today?',getIntents());
         },
             function (session, results) {
                 if (!results.response) {
@@ -176,7 +186,7 @@ if(newUser){
                     case  'I want to do something':
                         return session.beginDialog('involve');
                     case 'Work on an issue':
-                    	return session.beginDialog('issue');
+                        return session.beginDialog('issue');
 
                 }
             }
@@ -215,8 +225,3 @@ else if(!newUser){
             }
     ]));
 }
-
-
-
-
-
