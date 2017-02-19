@@ -36,6 +36,7 @@ var connection = new Connection(config);
 connection.on('connect', function(err) {
     if (err) return console.error(err); // <- 
     executeStatement('phone', 'Users', 'userID');
+    userNew();
 });
 
 var bot = new builder.UniversalBot(connector);
@@ -51,6 +52,7 @@ bot.dialog('involve', Involve.Dialog);
 bot.dialog('issue', Issue.Dialog);
 
 var phone = "";
+var phones = ['5555555555', '00000000000'];
 
 function executeStatement(item, table, from) {  
     request = new Request("SELECT TOP 1 "+item+" FROM " + table + " WHERE "+from+"=001 ORDER BY RAND();", function(err) {  
@@ -66,9 +68,10 @@ function executeStatement(item, table, from) {
             result+= column.value + " ";  
           }  
         });  
-        console.log(result); 
+        //console.log(result); 
         phone = result;
         result ="";  
+        console.log("ph1: " + phone);
     });  
 
     request.on('done', function(rowCount, more) {  
@@ -87,8 +90,6 @@ function getIntents(){
     return ['I have time today','I want to do something','Work on an issue'];
 }
 
-var phones = [5555555555, 00000000000];
-
 // http://i.imgur.com/dxaVAwf.png # excited bunny
 // http://i.imgur.com/pH5B1R9.png # rip bunny 
 // http://i.imgur.com/xpFl3in.png # k. bunny
@@ -97,11 +98,23 @@ var phones = [5555555555, 00000000000];
 
 var newUser = true;
 
-if(newUser){
+function userNew(){
+    if(phone.localeCompare(phones[0])==1){
+        newUser = false;
+        console.log("ph3: " + phone);
+        console.log(phones[0]);
+        console.log(phone.localeCompare(phones[0]));
+        return false
+    }
+}
+
+if(userNew()){
+    console.log("NEW USER");
     bot.dialog('/', new builder.IntentDialog()
         .onDefault([
         function (session) {
-            console.log(phone.toString() == phones[0]);
+            console.log(phone.localeCompare(phones[0]));
+            console.log("ph4: " + phone);
         	session.send('Hey, I\’m AccountaBunny ' + emoji.get('rabbit') + ' I\’m here to help you become a contributing member of society (like in a fun way)!');
             var msg = new builder.Message(session)
                 .attachments([{
@@ -188,7 +201,8 @@ if(newUser){
             }
     ]));
 }
-else if(!newUser){
+else if(!userNew()){
+    console.log("OLD USER");    
     bot.dialog('/', new builder.IntentDialog()
         .onDefault([
         function (session){
